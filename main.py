@@ -6,6 +6,10 @@ import datetime
 from aiogram.types import Message
 
 
+import openpyxl
+from openpyxl import Workbook
+
+
 db_worker = DBWorkerAsync(engine_async)
 
 
@@ -58,6 +62,16 @@ class UsersView:
         self.surname = user_shtat.surname
         self.fio_doctor = user_spu.fio_doctor
 
+    
+    def to_excel(self, file_path: str):
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet['A1'] = 'Surname'
+        sheet['B1'] = 'FIO Doctor'
+        sheet['A2'] = self.surname
+        sheet['B2'] = self.fio_doctor
+        workbook.save(file_path)
+
 
 async def spu_join_shat():
     result = await db_worker.custom_orm_select(
@@ -74,6 +88,7 @@ async def spu_join_shat():
         user_shtat: UsersShtat = row[1]
         user_view = UsersView(user_spu, user_shtat)
         print(f"{user_view.surname} \\\ {user_view.fio_doctor}")
+        user_view.to_excel('test.xlsx')
 
 
 asyncio.run(spu_join_shat())
