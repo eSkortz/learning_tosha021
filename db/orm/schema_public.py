@@ -10,6 +10,7 @@ from db.orm.annotations import (
     BigintColumn,
     IntegerColumn,
     ListTextColumn,
+    DateColumn
 )
 
 
@@ -40,6 +41,22 @@ class UsersShtat(Base):
     fio: Mapped[TextColumn]
     inn: Mapped[BigintColumn]
     job_is_active: Mapped[BoolColumn]
+
+
+class UsersSpu(Base):
+    __tablename__ = "spu"
+    id: Mapped[IntegerPrimaryKey]
+    date_of_service: Mapped[DateColumn]
+    ac: Mapped[TextColumn]
+    address: Mapped[TextColumn]
+    prikreplenie: Mapped[TextColumn]
+    date_of_birth: Mapped[DateColumn]
+    oms: Mapped[TextColumn]
+    gender: Mapped[TextColumn]
+    fio: Mapped[TextColumn]
+    department: Mapped[TextColumn]
+    fio_doctor: Mapped[TextColumn]
+    special_case_off: Mapped[TextColumn]
 
 
 class UsersRoles(Base):

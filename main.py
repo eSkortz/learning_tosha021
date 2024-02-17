@@ -1,6 +1,6 @@
 from config import engine_async
 from db.oop.alchemy_di_async import DBWorkerAsync
-from db.orm.schema_public import UsersShtat, UsersRoles, Roles, UsersTelegram
+from db.orm.schema_public import UsersShtat, UsersSpu, UsersRoles, UsersTelegram, Roles
 import asyncio
 import datetime
 from aiogram.types import Message
@@ -50,10 +50,30 @@ async def create_role_for_user(user_id: int, role_id: int) -> None:
     await db_worker.custom_upsert(cls_to=UsersRoles, index_elements=['user_id', 'role_id'], data=data_for_db, update_set=['is_active'])
 
 
-async def main():
-    user_data = await check_user_exist(Message)
-    info: UsersShtat = user_data["info"]
-    roles: Roles = user_data["roles"]
+class UsersView:
+    surname: str
+    fio_doctor: str
 
-    if roles == []:
-        await bot.send_message(chat_id=uu, text=f'Такой то пользователь {info.id} {info.fio} не имеет ролей, ему нужно их назначить')
+    def __init__(self, user_spu: UsersSpu, user_shtat: UsersShtat) -> None:
+        self.surname = user_shtat.surname
+        self.fio_doctor = user_spu.fio_doctor
+
+
+async def spu_join_shat():
+    result = await db_worker.custom_orm_select(
+        cls_from=[UsersSpu, UsersShtat],
+        where_params=[
+            UsersSpu.fio_doctor == UsersShtat.fio,
+            UsersSpu.prikreplenie.like("%ГБУЗ ГП № 6 ДЗМ%"),
+            UsersSpu.special_case_off.like("%Да%"),
+        ],
+        sql_limit=10,
+    )
+    for row in result:
+        user_spu: UsersSpu = row[0]
+        user_shtat: UsersShtat = row[1]
+        user_view = UsersView(user_spu, user_shtat)
+        print(f"{user_view.surname} \\\ {user_view.fio_doctor}")
+
+
+asyncio.run(spu_join_shat())
